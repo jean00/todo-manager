@@ -5,13 +5,12 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  TextField,
   Typography,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import type { TodoCardProps } from "./TodoCard.type";
 import { useState } from "react";
-import TransitionsModal from "../../../ui/TransitionsModal";
+import { useCrossStore } from "../../../../store/cross/store";
 
 const options = [
   "Edit",
@@ -25,18 +24,45 @@ const ITEM_HEIGHT = 48;
 
 const TodoCard = ({ title, description }: TodoCardProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [openModal, setOpenModal] = useState(false);
   const open = Boolean(anchorEl);
+  const { setModalConfig } = useCrossStore();
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleOnClick = (option: string) => {
+
+  const handleMenuOptionClick = (option: string) => {
     switch (option) {
       case "Edit":
-        setOpenModal(true);
+        setModalConfig({
+          open: true,
+          modalType: "edit",
+          defaultTitle: title,
+          defaultDescription: description,
+          onClose: () => {
+            setModalConfig({ open: false });
+          },
+          onConfirm: (edited) => {
+            console.log("Edited Todo:", edited);
+            // Here you would update your todo in your state/backend
+            setModalConfig({ open: false });
+          },
+        });
         break;
       case "Delete":
-        // Handle delete action
+        setModalConfig({
+          open: true,
+          modalType: "delete",
+          defaultTitle: title,
+          onClose: () => {
+            setModalConfig({ open: false });
+          },
+          onConfirm: () => {
+            console.log("Deleted Todo:", title);
+            // Here you would delete your todo from your state/backend
+            setModalConfig({ open: false });
+          },
+        });
         break;
       default:
         break;
@@ -96,7 +122,7 @@ const TodoCard = ({ title, description }: TodoCardProps) => {
               <MenuItem
                 key={option}
                 // selected={option === "Pyxis"}
-                onClick={() => handleOnClick(option)}
+                onClick={() => handleMenuOptionClick(option)}
               >
                 {option}
               </MenuItem>
@@ -104,14 +130,6 @@ const TodoCard = ({ title, description }: TodoCardProps) => {
           </Menu>
         </CardActions>
       </Card>
-      <TransitionsModal open={openModal} onClose={() => setOpenModal(false)}>
-        <Typography variant="h6" component="h2">
-          Edit Todo
-        </Typography>
-        <form>
-          <TextField id="filled-basic" label="Search" variant="standard" />
-        </form>
-      </TransitionsModal>
     </>
   );
 };

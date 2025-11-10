@@ -6,6 +6,8 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "./App.css";
+import { useCrossStore } from "./store/cross/store";
+import CommonModal from "./components/ui/CommonModal";
 
 const theme = createTheme({
   colorSchemes: {
@@ -14,11 +16,14 @@ const theme = createTheme({
 });
 
 function App() {
+  const { modalConfig } = useCrossStore();
+
   return (
     <ThemeProvider theme={theme}>
       <Header />
       <main>
         <TodoList />
+        <CommonModal {...modalConfig} />
       </main>
     </ThemeProvider>
   );

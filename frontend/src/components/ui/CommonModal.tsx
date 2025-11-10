@@ -1,0 +1,152 @@
+import {
+  Box,
+  Fade,
+  Modal,
+  useTheme,
+  TextField,
+  Stack,
+  Button,
+  Typography,
+} from "@mui/material";
+import { useMemo, useState, useEffect } from "react";
+import type { ModalType } from "../../store/cross/store";
+
+interface CommonModalProps {
+  open: boolean;
+  modalType: ModalType;
+  onClose: () => void;
+  onConfirm: (args?: any) => void;
+  defaultTitle: string;
+  defaultDescription?: string;
+}
+
+const CommonModal = ({
+  open,
+  modalType,
+  onClose,
+  onConfirm,
+  defaultTitle,
+  defaultDescription,
+}: CommonModalProps) => {
+  const theme = useTheme();
+  const [edited, setEdited] = useState({
+    title: defaultTitle || "",
+    description: defaultDescription || "",
+  });
+
+  // Reset edited state when modal opens with new data
+  useEffect(() => {
+    setEdited({
+      title: defaultTitle || "",
+      description: defaultDescription || "",
+    });
+  }, [defaultTitle, defaultDescription, open]);
+
+  const style = useMemo(
+    () => ({
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: { xs: "90%", sm: 500 },
+      bgcolor: theme.palette.background.paper,
+      color: theme.palette.text.primary,
+      borderRadius: 3,
+      boxShadow: 24,
+      p: 2,
+      outline: "none",
+    }),
+    [theme]
+  );
+
+  if (!open) {
+    return null;
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEdited((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSave = () => {
+    onConfirm(edited);
+    onClose();
+  };
+
+  const handleConfirmDelete = () => {
+    onConfirm();
+    onClose();
+  };
+
+  // Render Edit Modal
+  if (modalType === "edit") {
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Fade in={open}>
+          <Box sx={style}>
+            <TextField
+              variant="standard"
+              placeholder="Titolo"
+              name="title"
+              value={edited.title}
+              onChange={handleChange}
+              fullWidth
+              InputProps={{ disableUnderline: true }}
+              sx={{ mb: 1, fontWeight: "bold", fontSize: "1.1rem" }}
+            />
+            <TextField
+              variant="standard"
+              placeholder="Note..."
+              name="description"
+              value={edited.description}
+              onChange={handleChange}
+              multiline
+              rows={20}
+              fullWidth
+              InputProps={{ disableUnderline: true }}
+              sx={{
+                mb: 2,
+                color: "white",
+                minHeight: "100px",
+              }}
+            />
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button color="error" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>Save</Button>
+            </Stack>
+          </Box>
+        </Fade>
+      </Modal>
+    );
+  }
+
+  // Render Delete Confirmation Modal
+  if (modalType === "delete") {
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Fade in={open}>
+          <Box sx={style}>
+            <Typography variant="h6" gutterBottom>
+              Are you sure you want to delete "{defaultTitle}"?
+            </Typography>
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button color="error" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button onClick={handleConfirmDelete}>Confirm</Button>
+            </Stack>
+          </Box>
+        </Fade>
+      </Modal>
+    );
+  }
+
+  return null;
+};
+
+export default CommonModal;
