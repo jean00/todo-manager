@@ -4,7 +4,8 @@ import TodoCard from "./components/TodoCard/TodoCard";
 const mock = [
   {
     title: "Todo 1",
-    description: "This is the first todo item.",
+    description:
+      "This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.",
   },
   {
     title: "Todo 2",
@@ -60,8 +61,13 @@ const TodoList = () => {
   return (
     <Grid
       container
-      spacing={3}
-      columns={4}
+      spacing={2}
+      columns={{
+        xs: 1,
+        sm: 2,
+        md: 4,
+        lg: 6,
+      }}
       sx={{
         padding: 4,
       }}
