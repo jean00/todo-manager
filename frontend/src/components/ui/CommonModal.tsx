@@ -34,7 +34,24 @@ const CommonModal = ({
     description: defaultDescription || "",
   });
 
-  // Reset edited state when modal opens with new data
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEdited((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSave = () => {
+    onConfirm(edited);
+    onClose();
+  };
+
+  const handleConfirmDelete = () => {
+    onConfirm();
+    onClose();
+  };
+
   useEffect(() => {
     setEdited({
       title: defaultTitle || "",
@@ -63,41 +80,27 @@ const CommonModal = ({
     return null;
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEdited((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSave = () => {
-    onConfirm(edited);
-    onClose();
-  };
-
-  const handleConfirmDelete = () => {
-    onConfirm();
-    onClose();
-  };
-
-  // Render Edit Modal
   if (modalType === "edit") {
     return (
       <Modal open={open} onClose={onClose}>
         <Fade in={open}>
           <Box sx={style}>
             <TextField
+              error={edited.title.trim() === ""}
+              helperText={
+                edited.title.trim() === "" ? "Title is required" : undefined
+              }
               variant="standard"
               placeholder="Titolo"
               name="title"
               value={edited.title}
               onChange={handleChange}
               fullWidth
-              InputProps={{ disableUnderline: true }}
+              InputProps={{ disableUnderline: edited.title.trim() !== "" }}
               sx={{ mb: 1, fontWeight: "bold", fontSize: "1.1rem" }}
             />
             <TextField
+              error
               variant="standard"
               placeholder="Note..."
               name="description"
@@ -117,7 +120,12 @@ const CommonModal = ({
               <Button color="error" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={handleSave}>Save</Button>
+              <Button
+                disabled={edited.title.trim() === ""}
+                onClick={handleSave}
+              >
+                Confirm
+              </Button>
             </Stack>
           </Box>
         </Fade>

@@ -11,6 +11,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import type { TodoCardProps } from "./TodoCard.type";
 import { useState } from "react";
 import { useCrossStore } from "../../../../store/cross/store";
+import { todosService } from "../../../../service/todosService";
 
 const options = [
   "Edit",
@@ -22,13 +23,48 @@ const options = [
 
 const ITEM_HEIGHT = 48;
 
-const TodoCard = ({ title, description }: TodoCardProps) => {
+const TodoCard = ({ id, title, description }: TodoCardProps) => {
+  console.log({
+    id,
+    title,
+    description,
+  });
+
+  const { getTodos, deleteTodo, updateTodo } = todosService();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const { setModalConfig } = useCrossStore();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteTodo(id);
+      await getTodos();
+    } catch (error) {
+      console.error("Failed to delete todo:", error);
+    } finally {
+      setModalConfig({ open: false });
+      setAnchorEl(null);
+    }
+  };
+
+  const handleUpdate = async (edited: {
+    title: string;
+    description: string;
+  }) => {
+    try {
+      await updateTodo(id, edited);
+      await getTodos();
+    } catch (error) {
+      console.error("Failed to update todo:", error);
+    } finally {
+      setModalConfig({ open: false });
+      setAnchorEl(null);
+    }
   };
 
   const handleMenuOptionClick = (option: string) => {
@@ -42,11 +78,7 @@ const TodoCard = ({ title, description }: TodoCardProps) => {
           onClose: () => {
             setModalConfig({ open: false });
           },
-          onConfirm: (edited) => {
-            console.log("Edited Todo:", edited);
-            // Here you would update your todo in your state/backend
-            setModalConfig({ open: false });
-          },
+          onConfirm: handleUpdate,
         });
         break;
       case "Delete":
@@ -57,11 +89,7 @@ const TodoCard = ({ title, description }: TodoCardProps) => {
           onClose: () => {
             setModalConfig({ open: false });
           },
-          onConfirm: () => {
-            console.log("Deleted Todo:", title);
-            // Here you would delete your todo from your state/backend
-            setModalConfig({ open: false });
-          },
+          onConfirm: handleDelete,
         });
         break;
       default:
@@ -71,66 +99,64 @@ const TodoCard = ({ title, description }: TodoCardProps) => {
   };
 
   return (
-    <>
-      <Card>
-        <CardContent>
-          <Typography variant="h5">{title}</Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 10,
-              overflow: "hidden",
-            }}
-          >
-            {description}
-          </Typography>
-        </CardContent>
-        <CardActions
+    <Card>
+      <CardContent>
+        <Typography variant="h5">{title}</Typography>
+        <Typography
+          variant="body2"
           sx={{
-            justifyContent: "flex-end",
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 10,
+            overflow: "hidden",
           }}
         >
-          <IconButton
-            aria-label="open menu"
-            aria-controls={open ? "menu" : undefined}
-            aria-expanded={open ? "true" : undefined}
-            aria-haspopup="true"
-            onClick={handleClick}
-          >
-            <MoreVertIcon />
-          </IconButton>
-          <Menu
-            id="long-menu"
-            anchorEl={anchorEl}
-            open={open}
-            // onClose={handleClose}
-            slotProps={{
-              paper: {
-                style: {
-                  maxHeight: ITEM_HEIGHT * 4.5,
-                  width: "20ch",
-                },
+          {description}
+        </Typography>
+      </CardContent>
+      <CardActions
+        sx={{
+          justifyContent: "flex-end",
+        }}
+      >
+        <IconButton
+          aria-label="open menu"
+          aria-controls={open ? "menu" : undefined}
+          aria-expanded={open ? "true" : undefined}
+          aria-haspopup="true"
+          onClick={handleClick}
+        >
+          <MoreVertIcon />
+        </IconButton>
+        <Menu
+          id="long-menu"
+          anchorEl={anchorEl}
+          open={open}
+          // onClose={handleClose}
+          slotProps={{
+            paper: {
+              style: {
+                maxHeight: ITEM_HEIGHT * 4.5,
+                width: "20ch",
               },
-              list: {
-                "aria-labelledby": "long-button",
-              },
-            }}
-          >
-            {options.map((option) => (
-              <MenuItem
-                key={option}
-                // selected={option === "Pyxis"}
-                onClick={() => handleMenuOptionClick(option)}
-              >
-                {option}
-              </MenuItem>
-            ))}
-          </Menu>
-        </CardActions>
-      </Card>
-    </>
+            },
+            list: {
+              "aria-labelledby": "long-button",
+            },
+          }}
+        >
+          {options.map((option) => (
+            <MenuItem
+              key={option}
+              // selected={option === "Pyxis"}
+              onClick={() => handleMenuOptionClick(option)}
+            >
+              {option}
+            </MenuItem>
+          ))}
+        </Menu>
+      </CardActions>
+    </Card>
   );
 };
 

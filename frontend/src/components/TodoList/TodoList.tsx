@@ -1,63 +1,25 @@
 import { Grid } from "@mui/material";
 import TodoCard from "./components/TodoCard/TodoCard";
-
-const mock = [
-  {
-    title: "Todo 1",
-    description:
-      "This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.This is the first todo item.",
-  },
-  {
-    title: "Todo 2",
-    description: "This is the second todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-  {
-    title: "Todo 3",
-    description: "This is the third todo item.",
-  },
-];
+import { useEffect } from "react";
+import { todosService } from "../../service/todosService";
+import { useTodosStore } from "../../store/todos/store";
 
 const TodoList = () => {
+  const { getTodos } = todosService();
+  const { todos } = useTodosStore();
+
+  const getData = async () => {
+    try {
+      await getTodos();
+    } catch (error) {
+      console.error("Failed to fetch todos:", error);
+    }
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
   return (
     <Grid
       container
@@ -72,9 +34,13 @@ const TodoList = () => {
         padding: 4,
       }}
     >
-      {mock.map((todo, index) => (
-        <Grid size={1} key={index}>
-          <TodoCard title={todo.title} description={todo.description} />
+      {todos.map((todo) => (
+        <Grid size={1} key={todo._id}>
+          <TodoCard
+            id={todo._id}
+            title={todo.title}
+            description={todo.description}
+          />
         </Grid>
       ))}
     </Grid>

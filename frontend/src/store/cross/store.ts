@@ -30,7 +30,7 @@ const crossInitialState: CrossInitialState = {
   },
 };
 
-const CrossActions = (set: {
+const crossActions = (set: {
   (
     partial:
       | CrossStore
@@ -54,5 +54,5 @@ const CrossActions = (set: {
 
 export const useCrossStore = create<CrossStore>((set) => ({
   ...crossInitialState,
-  ...CrossActions(set),
+  ...crossActions(set),
 }));

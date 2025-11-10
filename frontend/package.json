@@ -16,6 +16,7 @@
     "@mui/icons-material": "^7.3.5",
     "@mui/joy": "^5.0.0-beta.52",
     "@mui/material": "^7.3.5",
+    "axios": "^1.13.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "zustand": "^5.0.8"
