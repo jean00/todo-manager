@@ -50,7 +50,7 @@ const Header = () => {
             gap: 2,
           }}
         >
-          <Typography variant="h6">Task manager</Typography>
+          <Typography variant="h6">Todo manager</Typography>
           <TextField
             id="search-todos"
             variant="outlined"
