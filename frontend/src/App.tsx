@@ -76,7 +76,7 @@ function AppContent() {
           toastConfig={toastConfig}
           handleClose={() => setToastConfig({ open: false })}
         />
-        <Box sx={{ position: "absolute", bottom: 16, right: 16 }}>
+        <Box sx={{ position: "fixed", bottom: 16, right: 16 }}>
           <Fab
             color="primary"
             aria-label="add"

@@ -34,5 +34,6 @@ img {
 }
 
 main {
+  position: relative;
   padding: 2rem;
 }
