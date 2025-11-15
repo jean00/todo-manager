@@ -18,7 +18,7 @@ export const todosService = () => {
 
   const updateTodo = async (
     todoId: string,
-    data: { title?: string; description?: string }
+    data: { title?: string; description?: string; backgroundColor?: string }
   ) => {
     const endpoints = await getEndpoints();
     const res = await axios.patch(`${endpoints.todos}/${todoId}`, data);

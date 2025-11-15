@@ -2,16 +2,23 @@ import {
   Card,
   CardActions,
   CardContent,
+  CardHeader,
   IconButton,
   Menu,
   MenuItem,
+  Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
+import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
+import AddAlertOutlinedIcon from "@mui/icons-material/AddAlertOutlined";
 import type { TodoCardProps } from "./TodoCard.type";
 import { useState } from "react";
 import { useCrossStore } from "../../../../store/cross/store";
 import { todosService } from "../../../../service/todosService";
+import ColorPicker from "../../../ui/ColorPicker";
 
 const options = [
   "Edit",
@@ -23,22 +30,24 @@ const options = [
 
 const ITEM_HEIGHT = 48;
 
-const TodoCard = ({ id, title, description }: TodoCardProps) => {
-  console.log({
-    id,
-    title,
-    description,
-  });
-
+const TodoCard = ({
+  id,
+  title,
+  description,
+  backgroundColor,
+}: TodoCardProps) => {
   const { getTodos, deleteTodo, updateTodo } = todosService();
-
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = useState<{
+    colorPicker: HTMLElement | null;
+    menu: HTMLElement | null;
+  }>({
+    colorPicker: null,
+    menu: null,
+  });
+  const open = Boolean(anchorEl.menu);
   const { setModalConfig } = useCrossStore();
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const theme = useTheme();
+  const [selectedColor, setSelectedColor] = useState(backgroundColor || "");
 
   const handleDelete = async () => {
     try {
@@ -48,13 +57,17 @@ const TodoCard = ({ id, title, description }: TodoCardProps) => {
       console.error("Failed to delete todo:", error);
     } finally {
       setModalConfig({ open: false });
-      setAnchorEl(null);
+      setAnchorEl((prev) => ({
+        ...prev,
+        menu: null,
+      }));
     }
   };
 
   const handleUpdate = async (edited: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
+    backgroundColor?: string;
   }) => {
     try {
       await updateTodo(id, edited);
@@ -63,7 +76,10 @@ const TodoCard = ({ id, title, description }: TodoCardProps) => {
       console.error("Failed to update todo:", error);
     } finally {
       setModalConfig({ open: false });
-      setAnchorEl(null);
+      setAnchorEl((prev) => ({
+        ...prev,
+        menu: null,
+      }));
     }
   };
 
@@ -95,68 +111,125 @@ const TodoCard = ({ id, title, description }: TodoCardProps) => {
       default:
         break;
     }
-    setAnchorEl(null);
+    setAnchorEl((prev) => ({
+      ...prev,
+      menu: null,
+    }));
   };
 
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h5">{title}</Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            display: "-webkit-box",
-            WebkitBoxOrient: "vertical",
-            WebkitLineClamp: 10,
-            overflow: "hidden",
-          }}
-        >
-          {description}
-        </Typography>
-      </CardContent>
-      <CardActions
+    <>
+      <Card
         sx={{
-          justifyContent: "flex-end",
+          backgroundColor: selectedColor || theme.palette.background.paper,
+          borderRadius: "0.75rem",
+          "& .actions": {
+            opacity: 0,
+            visibility: "hidden",
+            transition: "opacity 0.2s ease, visibility 0.2s ease",
+          },
+          "&:hover .actions": {
+            opacity: 1,
+            visibility: "visible",
+          },
         }}
       >
-        <IconButton
-          aria-label="open menu"
-          aria-controls={open ? "menu" : undefined}
-          aria-expanded={open ? "true" : undefined}
-          aria-haspopup="true"
-          onClick={handleClick}
-        >
-          <MoreVertIcon />
-        </IconButton>
-        <Menu
-          id="long-menu"
-          anchorEl={anchorEl}
-          open={open}
-          // onClose={handleClose}
-          slotProps={{
-            paper: {
-              style: {
-                maxHeight: ITEM_HEIGHT * 4.5,
-                width: "20ch",
-              },
-            },
-            list: {
-              "aria-labelledby": "long-button",
-            },
+        <CardHeader
+          title={title}
+          action={
+            <IconButton className="actions">
+              <PushPinOutlinedIcon />
+            </IconButton>
+          }
+        />
+        <CardContent>
+          <Typography
+            variant="body2"
+            sx={{
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 10,
+              overflow: "hidden",
+            }}
+          >
+            {description}
+          </Typography>
+        </CardContent>
+        <CardActions
+          sx={{
+            justifyContent: "space-between",
           }}
+          className="actions"
         >
-          {options.map((option) => (
-            <MenuItem
-              key={option}
-              // selected={option === "Pyxis"}
-              onClick={() => handleMenuOptionClick(option)}
+          <Stack direction="row" spacing={1}>
+            <IconButton
+              aria-label="color"
+              onClick={(event) =>
+                setAnchorEl((prev) => ({
+                  ...prev,
+                  colorPicker: event.currentTarget,
+                }))
+              }
             >
-              {option}
-            </MenuItem>
-          ))}
-        </Menu>
-      </CardActions>
-    </Card>
+              <ColorLensOutlinedIcon />
+            </IconButton>
+            <IconButton aria-label="reminder">
+              <AddAlertOutlinedIcon />
+            </IconButton>
+          </Stack>
+          <IconButton
+            aria-label="open menu"
+            aria-controls={open ? "menu" : undefined}
+            aria-expanded={open ? "true" : undefined}
+            aria-haspopup="true"
+            onClick={(event) =>
+              setAnchorEl((prev) => ({
+                ...prev,
+                menu: event.currentTarget,
+              }))
+            }
+          >
+            <MoreVertIcon />
+          </IconButton>
+          <Menu
+            id="long-menu"
+            anchorEl={anchorEl.menu}
+            open={open}
+            onClose={() => setAnchorEl((prev) => ({ ...prev, menu: null }))}
+            slotProps={{
+              paper: {
+                style: {
+                  maxHeight: ITEM_HEIGHT * 4.5,
+                  width: "20ch",
+                },
+              },
+              list: {
+                "aria-labelledby": "long-button",
+              },
+            }}
+          >
+            {options.map((option) => (
+              <MenuItem
+                key={option}
+                // selected={option === "Pyxis"}
+                onClick={() => handleMenuOptionClick(option)}
+              >
+                {option}
+              </MenuItem>
+            ))}
+          </Menu>
+        </CardActions>
+      </Card>
+      <ColorPicker
+        color={selectedColor || theme.palette.background.paper}
+        setColor={setSelectedColor}
+        anchorEl={anchorEl.colorPicker}
+        onClose={() => setAnchorEl((prev) => ({ ...prev, colorPicker: null }))}
+        onConfirm={() => {
+          handleUpdate({ backgroundColor: selectedColor });
+        }}
+      />
+    </>
   );
 };
 

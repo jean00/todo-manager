@@ -14,3 +14,10 @@ export interface ModalConfig {
   defaultDescription?: string;
   onConfirm?: (args?: any) => void;
 }
+
+export interface Todo {
+  _id: string;
+  title: string;
+  description: string;
+  backgroundColor?: string;
+}

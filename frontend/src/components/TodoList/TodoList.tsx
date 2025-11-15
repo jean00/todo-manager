@@ -40,6 +40,7 @@ const TodoList = () => {
             id={todo._id}
             title={todo.title}
             description={todo.description}
+            backgroundColor={todo.backgroundColor}
           />
         </Grid>
       ))}

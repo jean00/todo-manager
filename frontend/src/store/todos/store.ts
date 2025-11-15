@@ -1,11 +1,8 @@
 import { create } from "zustand";
+import type { Todo } from "../../types";
 
 declare interface TodosInitialState {
-  todos: {
-    _id: string;
-    title: string;
-    description: string;
-  }[];
+  todos: Todo[];
 }
 
 declare interface TodosActions {
