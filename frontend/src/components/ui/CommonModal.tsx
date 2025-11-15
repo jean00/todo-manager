@@ -9,16 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useState, useEffect } from "react";
-import type { ModalType } from "../../store/cross/store";
-
-interface CommonModalProps {
-  open: boolean;
-  modalType: ModalType;
-  onClose: () => void;
-  onConfirm: (args?: any) => void;
-  defaultTitle: string;
-  defaultDescription?: string;
-}
+import type { ModalConfig } from "../../types";
 
 const CommonModal = ({
   open,
@@ -27,7 +18,7 @@ const CommonModal = ({
   onConfirm,
   defaultTitle,
   defaultDescription,
-}: CommonModalProps) => {
+}: ModalConfig) => {
   const theme = useTheme();
   const [edited, setEdited] = useState({
     title: defaultTitle || "",
@@ -43,13 +34,13 @@ const CommonModal = ({
   };
 
   const handleSave = () => {
-    onConfirm(edited);
-    onClose();
+    onConfirm && onConfirm(edited);
+    onClose && onClose();
   };
 
   const handleConfirmDelete = () => {
-    onConfirm();
-    onClose();
+    onConfirm && onConfirm();
+    onClose && onClose();
   };
 
   useEffect(() => {
@@ -147,6 +138,58 @@ const CommonModal = ({
                 Cancel
               </Button>
               <Button onClick={handleConfirmDelete}>Confirm</Button>
+            </Stack>
+          </Box>
+        </Fade>
+      </Modal>
+    );
+  }
+
+  if (modalType === "create") {
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Fade in={open}>
+          <Box sx={style}>
+            <TextField
+              error={edited.title.trim() === ""}
+              helperText={
+                edited.title.trim() === "" ? "Title is required" : undefined
+              }
+              variant="standard"
+              placeholder="Title"
+              name="title"
+              value={edited.title}
+              onChange={handleChange}
+              fullWidth
+              InputProps={{ disableUnderline: edited.title.trim() !== "" }}
+              sx={{ mb: 1, fontWeight: "bold", fontSize: "1.1rem" }}
+            />
+            <TextField
+              variant="standard"
+              placeholder="Notes..."
+              name="description"
+              value={edited.description}
+              onChange={handleChange}
+              multiline
+              rows={20}
+              fullWidth
+              InputProps={{ disableUnderline: true }}
+              sx={{
+                mb: 2,
+                color: "white",
+                minHeight: "100px",
+              }}
+            />
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button color="error" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                disabled={edited.title.trim() === ""}
+                onClick={handleSave}
+              >
+                Create
+              </Button>
             </Stack>
           </Box>
         </Fade>

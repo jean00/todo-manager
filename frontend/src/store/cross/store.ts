@@ -1,20 +1,16 @@
 import { create } from "zustand";
+import type { ModalConfig, ToastConfig } from "../../types";
 
-export type ModalType = "edit" | "delete" | null;
+export type ModalType = "edit" | "delete" | "create" | null;
 
 declare interface CrossInitialState {
-  modalConfig: {
-    open: boolean;
-    modalType: ModalType;
-    onClose: () => void;
-    defaultTitle: string;
-    defaultDescription?: string;
-    onConfirm: (args?: any) => void;
-  };
+  modalConfig: ModalConfig;
+  toastConfig: ToastConfig;
 }
 
 declare interface CrossActions {
-  setModalConfig: (config: Partial<CrossInitialState["modalConfig"]>) => void;
+  setModalConfig: (config: ModalConfig) => void;
+  setToastConfig: (config: ToastConfig) => void;
 }
 
 export type CrossStore = CrossInitialState & CrossActions;
@@ -22,11 +18,18 @@ export type CrossStore = CrossInitialState & CrossActions;
 const crossInitialState: CrossInitialState = {
   modalConfig: {
     open: false,
-    modalType: null,
+    modalType: undefined,
     onClose: () => {},
     defaultTitle: "",
     defaultDescription: "",
     onConfirm: () => {},
+  },
+  toastConfig: {
+    open: false,
+    message: "",
+    autoHideDuration: 3000,
+    severity: "info",
+    title: "",
   },
 };
 
@@ -43,10 +46,17 @@ const crossActions = (set: {
     replace: true
   ): void;
 }) => ({
-  setModalConfig: (config: Partial<CrossInitialState["modalConfig"]>) =>
+  setModalConfig: (config: ModalConfig) =>
     set((state) => ({
       modalConfig: {
         ...state.modalConfig,
+        ...config,
+      },
+    })),
+  setToastConfig: (config: ToastConfig) =>
+    set((state) => ({
+      toastConfig: {
+        ...state.toastConfig,
         ...config,
       },
     })),

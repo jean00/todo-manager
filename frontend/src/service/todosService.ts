@@ -25,9 +25,18 @@ export const todosService = () => {
     return res.data;
   };
 
+  const createTodo = async (title: string, description?: string) => {
+    const endpoints = await getEndpoints();
+    const body = { title, description };
+    console.log({ body });
+    const res = await axios.post(endpoints.todos, body);
+    return res.data;
+  };
+
   return {
     getTodos,
     deleteTodo,
     updateTodo,
+    createTodo,
   };
 };

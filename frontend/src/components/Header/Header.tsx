@@ -2,6 +2,7 @@ import {
   AppBar,
   Box,
   IconButton,
+  InputAdornment,
   TextField,
   Toolbar,
   Typography,
@@ -9,6 +10,7 @@ import {
 import { useColorScheme } from "@mui/material/styles";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 
 const Header = () => {
   const { mode, setMode } = useColorScheme();
@@ -30,7 +32,21 @@ const Header = () => {
           }}
         >
           <Typography variant="h6">Task manager</Typography>
-          <TextField id="filled-basic" label="Search" variant="standard" />
+          <TextField
+            id="filled-basic"
+            label="Search"
+            variant="outlined"
+            size="small"
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
         </Box>
         <IconButton
           aria-label="Toggle theme"
