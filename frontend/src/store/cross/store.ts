@@ -4,11 +4,13 @@ import type { ModalConfig, ToastConfig } from "../../types";
 declare interface CrossInitialState {
   modalConfig: ModalConfig;
   toastConfig: ToastConfig;
+  searchQuery: string;
 }
 
 declare interface CrossActions {
   setModalConfig: (config: ModalConfig) => void;
   setToastConfig: (config: ToastConfig) => void;
+  setSearchQuery: (query: string) => void;
 }
 
 export type CrossStore = CrossInitialState & CrossActions;
@@ -29,6 +31,7 @@ const crossInitialState: CrossInitialState = {
     severity: "info",
     title: "",
   },
+  searchQuery: "",
 };
 
 const crossActions = (set: {
@@ -57,6 +60,10 @@ const crossActions = (set: {
         ...state.toastConfig,
         ...config,
       },
+    })),
+  setSearchQuery: (query: string) =>
+    set(() => ({
+      searchQuery: query,
     })),
 });
 

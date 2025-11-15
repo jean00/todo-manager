@@ -1,7 +1,6 @@
 import {
   AppBar,
   Box,
-  debounce,
   IconButton,
   InputAdornment,
   TextField,
@@ -12,15 +11,28 @@ import { useColorScheme } from "@mui/material/styles";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import { todosService } from "../../service/todosService";
+import { useState, useCallback, useEffect } from "react";
+import { useCrossStore } from "../../store/cross/store";
 
 const Header = () => {
   const { mode, setMode } = useColorScheme();
-  const { getTodo } = todosService();
+  const { searchQuery, setSearchQuery } = useCrossStore();
+  const [inputValue, setInputValue] = useState(searchQuery);
 
-  const debouncedSearch = debounce((query: string) => {
-    getTodo(query);
-  }, 1000);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(inputValue);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [inputValue, setSearchQuery]);
+
+  const handleSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setInputValue(event.target.value);
+    },
+    []
+  );
 
   if (!mode) {
     return null;
@@ -40,10 +52,11 @@ const Header = () => {
         >
           <Typography variant="h6">Task manager</Typography>
           <TextField
-            id="filled-basic"
+            id="search-todos"
             variant="outlined"
             placeholder="Search"
             size="small"
+            value={inputValue}
             slotProps={{
               input: {
                 startAdornment: (
@@ -53,7 +66,7 @@ const Header = () => {
                 ),
               },
             }}
-            onChange={(event) => debouncedSearch(event.target.value)}
+            onChange={handleSearchChange}
           />
         </Box>
         <IconButton

@@ -1,38 +1,48 @@
-import { Grid, Stack, Typography } from "@mui/material";
+import { CircularProgress, Grid, Stack, Typography } from "@mui/material";
 import TodoCard from "./components/TodoCard/TodoCard";
-import { useEffect } from "react";
-import { todosService } from "../../service/todosService";
-import { useTodosStore } from "../../store/todos/store";
 import { grey } from "@mui/material/colors";
+import { useTodos, useDeleteTodo, useUpdateTodo } from "../../hooks/useTodos";
+import { useCrossStore } from "../../store/cross/store";
+import { useMemo } from "react";
 
 const TodoList = () => {
-  const { getTodos, deleteTodo, updateTodo } = todosService();
-  const { todos } = useTodosStore();
+  const { searchQuery, setToastConfig } = useCrossStore();
+  const {
+    data: todos = [],
+    isLoading,
+    error,
+  } = useTodos(searchQuery || undefined);
+  const deleteTodoMutation = useDeleteTodo();
+  const updateTodoMutation = useUpdateTodo();
 
-  const { pinnedTodos, unpinnedTodos } = todos.reduce(
-    (acc, todo) => {
-      if (todo.isPinned) acc.pinnedTodos.push(todo);
-      else acc.unpinnedTodos.push(todo);
-
-      return acc;
-    },
-    { pinnedTodos: [] as typeof todos, unpinnedTodos: [] as typeof todos }
-  );
-
-  const getData = async () => {
-    try {
-      await getTodos();
-    } catch (error) {
-      console.error("Failed to fetch todos:", error);
-    }
-  };
+  const { pinnedTodos, unpinnedTodos } = useMemo(() => {
+    return todos.reduce(
+      (acc, todo) => {
+        if (todo.isPinned) acc.pinnedTodos.push(todo);
+        else acc.unpinnedTodos.push(todo);
+        return acc;
+      },
+      { pinnedTodos: [] as typeof todos, unpinnedTodos: [] as typeof todos }
+    );
+  }, [todos]);
 
   const onDelete = async (id: string) => {
     try {
-      await deleteTodo(id);
-      await getData();
+      await deleteTodoMutation.mutateAsync(id);
+      setToastConfig({
+        open: true,
+        message: "Todo deleted successfully",
+        severity: "success",
+        title: "Success",
+      });
     } catch (error) {
       console.error("Failed to delete todo:", error);
+      setToastConfig({
+        open: true,
+        message: "Failed to delete todo",
+        severity: "error",
+        title: "Error",
+      });
     }
   };
 
@@ -43,19 +53,43 @@ const TodoList = () => {
       description?: string;
       backgroundColor?: string;
       isPinned?: boolean;
+      dueDate?: Date | null;
     }
   ) => {
     try {
-      await updateTodo(id, edited);
-      await getData();
+      await updateTodoMutation.mutateAsync({ id, data: edited });
+      setToastConfig({
+        open: true,
+        message: "Todo updated successfully",
+        severity: "success",
+        title: "Success",
+      });
     } catch (error) {
       console.error("Failed to update todo:", error);
+      setToastConfig({
+        open: true,
+        message: "Failed to update todo",
+        severity: "error",
+        title: "Error",
+      });
     }
   };
 
-  useEffect(() => {
-    getData();
-  }, []);
+  if (isLoading) {
+    return (
+      <Stack alignItems="center" justifyContent="center" sx={{ mt: 4 }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography variant="h6" align="center" color="error" sx={{ mt: 4 }}>
+        Error loading todos. Please try again.
+      </Typography>
+    );
+  }
 
   return (
     <Stack spacing={2}>

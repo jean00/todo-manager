@@ -10,8 +10,11 @@ import { useCrossStore } from "./store/cross/store";
 import CommonModal from "./components/ui/CommonModal";
 import { Box, CssBaseline, Fab } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { todosService } from "./service/todosService";
 import Toast from "./components/ui/Toast";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useCreateTodo } from "./hooks/useTodos";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const theme = createTheme({
   colorSchemes: {
@@ -19,18 +22,28 @@ const theme = createTheme({
   },
 });
 
-function App() {
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+function AppContent() {
   const { modalConfig, setModalConfig, toastConfig, setToastConfig } =
     useCrossStore();
-  const { createTodo, getTodos } = todosService();
+  const createTodoMutation = useCreateTodo();
 
   const handleOnConfirmCreate = async (edited: {
     title: string;
     description?: string;
   }) => {
     try {
-      await createTodo(edited.title, edited.description);
-      await getTodos();
+      await createTodoMutation.mutateAsync(edited);
       setModalConfig({
         open: false,
       });
@@ -44,7 +57,8 @@ function App() {
       console.error("Failed to create todo:", error);
       setToastConfig({
         open: true,
-        message: "Failed to create todo",
+        message:
+          error instanceof Error ? error.message : "Failed to create todo",
         severity: "error",
         title: "Error",
       });
@@ -83,6 +97,17 @@ function App() {
         </Box>
       </main>
     </ThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AppContent />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
