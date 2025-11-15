@@ -1,6 +1,7 @@
 type Endpoints = typeof endpoints;
 
-const BASE_URL = "/api/v1/";
+// Use environment variable for API URL, fallback to local proxy
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api/v1/";
 
 const endpoints = {
   todos: "todos/",
