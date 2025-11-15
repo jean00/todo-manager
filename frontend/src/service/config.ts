@@ -1,7 +1,9 @@
 type Endpoints = typeof endpoints;
 
-// Use environment variable for API URL, fallback to local proxy
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api/v1/";
+// Use environment variable for API base URL, otherwise use local proxy
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+  ? `${import.meta.env.VITE_API_BASE_URL}api/v1/`
+  : "/api/v1/";
 
 const endpoints = {
   todos: "todos/",
@@ -9,6 +11,6 @@ const endpoints = {
 
 export const getEndpoints = async (): Promise<Endpoints> => {
   return Object.fromEntries(
-    Object.entries(endpoints).map(([k, value]) => [k, BASE_URL + value])
+    Object.entries(endpoints).map(([k, value]) => [k, API_BASE_URL + value])
   ) as Endpoints;
 };
