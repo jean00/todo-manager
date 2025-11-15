@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import type { ModalConfig, ToastConfig } from "../../types";
 
-export type ModalType = "edit" | "delete" | "create" | null;
-
 declare interface CrossInitialState {
   modalConfig: ModalConfig;
   toastConfig: ToastConfig;

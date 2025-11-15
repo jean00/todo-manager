@@ -8,11 +8,12 @@ export interface ToastConfig {
 
 export interface ModalConfig {
   open: boolean;
-  modalType?: "edit" | "delete" | "create";
+  modalType?: "edit" | "delete" | "create" | "reminder";
   onClose?: () => void;
   defaultTitle?: string;
   defaultDescription?: string;
   onConfirm?: (args?: any) => void;
+  defaultDueDate?: Date;
 }
 
 export interface Todo {
@@ -21,4 +22,5 @@ export interface Todo {
   description: string;
   backgroundColor?: string;
   isPinned?: boolean;
+  dueDate?: Date;
 }

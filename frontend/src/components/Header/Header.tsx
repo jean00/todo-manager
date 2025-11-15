@@ -34,14 +34,13 @@ const Header = () => {
             display: "flex",
             flexDirection: "row",
             flexGrow: 1,
-            alignItems: "end",
+            alignItems: "center",
             gap: 2,
           }}
         >
           <Typography variant="h6">Task manager</Typography>
           <TextField
             id="filled-basic"
-            label="Search"
             variant="outlined"
             placeholder="Search"
             size="small"

@@ -10,6 +10,10 @@ import {
 } from "@mui/material";
 import { useMemo, useState, useEffect } from "react";
 import type { ModalConfig } from "../../types";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const CommonModal = ({
   open,
@@ -18,11 +22,17 @@ const CommonModal = ({
   onConfirm,
   defaultTitle,
   defaultDescription,
+  defaultDueDate,
 }: ModalConfig) => {
   const theme = useTheme();
-  const [edited, setEdited] = useState({
+  const [edited, setEdited] = useState<{
+    title: string;
+    description: string;
+    dueDate?: Date | undefined;
+  }>({
     title: defaultTitle || "",
     description: defaultDescription || "",
+    dueDate: defaultDueDate,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +57,7 @@ const CommonModal = ({
     setEdited({
       title: defaultTitle || "",
       description: defaultDescription || "",
+      dueDate: defaultDueDate,
     });
   }, [defaultTitle, defaultDescription, open]);
 
@@ -192,6 +203,50 @@ const CommonModal = ({
               </Button>
             </Stack>
           </Box>
+        </Fade>
+      </Modal>
+    );
+  }
+
+  if (modalType === "reminder") {
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Fade in={open}>
+          <Stack sx={style} spacing={2}>
+            <Typography variant="h6" gutterBottom>
+              Remind me
+            </Typography>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateTimePicker
+                value={edited.dueDate ? dayjs(edited.dueDate) : null}
+                label="Add a due date"
+                sx={{ width: "100%" }}
+                ampm={false}
+                onChange={(value) => {
+                  setEdited((prev) => ({
+                    ...prev,
+                    dueDate: value ? value.toDate() : undefined,
+                  }));
+                }}
+              />
+            </LocalizationProvider>
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button color="error" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  onConfirm &&
+                    onConfirm({
+                      dueDate: edited.dueDate,
+                    });
+                  onClose && onClose();
+                }}
+              >
+                Confirm
+              </Button>
+            </Stack>
+          </Stack>
         </Fade>
       </Modal>
     );

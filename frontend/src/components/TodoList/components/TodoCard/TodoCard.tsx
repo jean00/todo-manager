@@ -1,16 +1,15 @@
 import {
   Card,
+  CardActionArea,
   CardActions,
   CardContent,
   CardHeader,
+  Chip,
   IconButton,
-  Menu,
-  MenuItem,
   Stack,
   Typography,
   useTheme,
 } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import PushPinIcon from "@mui/icons-material/PushPin";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
@@ -19,16 +18,10 @@ import type { TodoCardProps } from "./TodoCard.type";
 import { useState } from "react";
 import { useCrossStore } from "../../../../store/cross/store";
 import ColorPicker from "../../../ui/ColorPicker";
-
-const options = [
-  "Edit",
-  "Delete",
-  // "Mark as Completed",
-  // "Assign to User",
-  // "Set Due Date",
-];
-
-const ITEM_HEIGHT = 48;
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import dayjs from "dayjs";
+import type { ModalConfig } from "../../../../types";
+import type { MouseEvent } from "react";
 
 const TodoCard = ({
   _id: id,
@@ -36,17 +29,11 @@ const TodoCard = ({
   description,
   backgroundColor,
   isPinned,
+  dueDate,
   onDelete,
   onUpdate,
 }: TodoCardProps) => {
-  const [anchorEl, setAnchorEl] = useState<{
-    colorPicker: HTMLElement | null;
-    menu: HTMLElement | null;
-  }>({
-    colorPicker: null,
-    menu: null,
-  });
-  const open = Boolean(anchorEl.menu);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const { setModalConfig } = useCrossStore();
   const theme = useTheme();
   const [todo, setTodo] = useState({
@@ -57,10 +44,7 @@ const TodoCard = ({
   const handleDelete = async () => {
     await onDelete(id);
     setModalConfig({ open: false });
-    setAnchorEl((prev) => ({
-      ...prev,
-      menu: null,
-    }));
+    setAnchorEl(null);
   };
 
   const handleUpdate = async (edited: {
@@ -68,47 +52,18 @@ const TodoCard = ({
     description?: string;
     backgroundColor?: string;
     isPinned?: boolean;
+    dueDate?: Date | null;
   }) => {
     await onUpdate(id, edited);
     setModalConfig({ open: false });
-    setAnchorEl((prev) => ({
-      ...prev,
-      menu: null,
-    }));
+    setAnchorEl(null);
   };
 
-  const handleMenuOptionClick = (option: string) => {
-    switch (option) {
-      case "Edit":
-        setModalConfig({
-          open: true,
-          modalType: "edit",
-          defaultTitle: title,
-          defaultDescription: description,
-          onClose: () => {
-            setModalConfig({ open: false });
-          },
-          onConfirm: handleUpdate,
-        });
-        break;
-      case "Delete":
-        setModalConfig({
-          open: true,
-          modalType: "delete",
-          defaultTitle: title,
-          onClose: () => {
-            setModalConfig({ open: false });
-          },
-          onConfirm: handleDelete,
-        });
-        break;
-      default:
-        break;
-    }
-    setAnchorEl((prev) => ({
-      ...prev,
-      menu: null,
-    }));
+  const handleOnClick = (e: MouseEvent<Element>, modalConfig: ModalConfig) => {
+    e.stopPropagation();
+    setModalConfig({
+      ...modalConfig,
+    });
   };
 
   return (
@@ -129,107 +84,142 @@ const TodoCard = ({
           },
         }}
       >
-        <CardHeader
-          title={title}
-          action={
-            <IconButton className="actions">
-              {todo.isPinned ? (
-                <PushPinIcon
-                  onClick={() => handleUpdate({ isPinned: !todo.isPinned })}
-                />
-              ) : (
-                <PushPinOutlinedIcon
-                  onClick={() => handleUpdate({ isPinned: !todo.isPinned })}
-                />
-              )}
-            </IconButton>
+        <CardActionArea
+          onClick={(e) =>
+            handleOnClick(e, {
+              open: true,
+              modalType: "edit",
+              defaultTitle: title,
+              defaultDescription: description,
+              onClose: () => {
+                setModalConfig({ open: false });
+              },
+              onConfirm: handleUpdate,
+            })
           }
-        />
-        <CardContent>
-          <Typography
-            variant="body2"
+        >
+          <CardHeader
+            title={title}
+            action={
+              <IconButton className="actions">
+                {todo.isPinned ? (
+                  <PushPinIcon
+                    onClick={() => handleUpdate({ isPinned: !todo.isPinned })}
+                  />
+                ) : (
+                  <PushPinOutlinedIcon
+                    onClick={() => handleUpdate({ isPinned: !todo.isPinned })}
+                  />
+                )}
+              </IconButton>
+            }
+          />
+
+          <CardContent
             sx={{
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 10,
-              overflow: "hidden",
+              cursor: "pointer",
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
             }}
           >
-            {description}
-          </Typography>
-        </CardContent>
-        <CardActions
-          sx={{
-            justifyContent: "space-between",
-          }}
-          className="actions"
-        >
-          <Stack direction="row" spacing={1}>
+            <Typography
+              variant="body2"
+              sx={{
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 10,
+                overflow: "hidden",
+              }}
+            >
+              {description}
+            </Typography>
+            {dueDate && (
+              <Chip
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "fit-content",
+                }}
+                variant="outlined"
+                label={dayjs(dueDate).format("MMM D, YYYY h:mm A")}
+                onClick={(e) =>
+                  handleOnClick(e, {
+                    open: true,
+                    modalType: "reminder",
+                    defaultDueDate: dueDate,
+                    onClose: () => {
+                      setModalConfig({ open: false });
+                    },
+                    onConfirm: handleUpdate,
+                  })
+                }
+                onDelete={(e) => {
+                  e.stopPropagation();
+                  handleUpdate({ dueDate: null });
+                }}
+              />
+            )}
+          </CardContent>
+          <CardActions
+            sx={{
+              justifyContent: "space-between",
+              zIndex: 9999,
+            }}
+            className="actions"
+          >
+            <Stack direction="row" spacing={1}>
+              <IconButton
+                aria-label="Change todo background color"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setAnchorEl(event.currentTarget);
+                }}
+              >
+                <ColorLensOutlinedIcon />
+              </IconButton>
+              <IconButton aria-label="Add reminder">
+                <AddAlertOutlinedIcon
+                  onClick={(e) =>
+                    handleOnClick(e, {
+                      open: true,
+                      modalType: "reminder",
+                      defaultDueDate: dueDate,
+                      onClose: () => {
+                        setModalConfig({ open: false });
+                      },
+                      onConfirm: handleUpdate,
+                    })
+                  }
+                />
+              </IconButton>
+            </Stack>
             <IconButton
-              aria-label="color"
-              onClick={(event) =>
-                setAnchorEl((prev) => ({
-                  ...prev,
-                  colorPicker: event.currentTarget,
-                }))
+              aria-label="Delete todo"
+              onClick={(e) =>
+                handleOnClick(e, {
+                  open: true,
+                  modalType: "delete",
+                  defaultTitle: title,
+                  onClose: () => {
+                    setModalConfig({ open: false });
+                  },
+                  onConfirm: handleDelete,
+                })
               }
             >
-              <ColorLensOutlinedIcon />
+              <DeleteOutlineIcon />
             </IconButton>
-            <IconButton aria-label="reminder">
-              <AddAlertOutlinedIcon />
-            </IconButton>
-          </Stack>
-          <IconButton
-            aria-label="open menu"
-            aria-controls={open ? "menu" : undefined}
-            aria-expanded={open ? "true" : undefined}
-            aria-haspopup="true"
-            onClick={(event) =>
-              setAnchorEl((prev) => ({
-                ...prev,
-                menu: event.currentTarget,
-              }))
-            }
-          >
-            <MoreVertIcon />
-          </IconButton>
-          <Menu
-            id="long-menu"
-            anchorEl={anchorEl.menu}
-            open={open}
-            onClose={() => setAnchorEl((prev) => ({ ...prev, menu: null }))}
-            slotProps={{
-              paper: {
-                style: {
-                  maxHeight: ITEM_HEIGHT * 4.5,
-                  width: "20ch",
-                },
-              },
-              list: {
-                "aria-labelledby": "long-button",
-              },
-            }}
-          >
-            {options.map((option) => (
-              <MenuItem
-                key={option}
-                // selected={option === "Pyxis"}
-                onClick={() => handleMenuOptionClick(option)}
-              >
-                {option}
-              </MenuItem>
-            ))}
-          </Menu>
-        </CardActions>
+          </CardActions>
+        </CardActionArea>
       </Card>
       <ColorPicker
         color={todo.backgroundColor || theme.palette.background.paper}
         setColor={(color) =>
           setTodo((prev) => ({ ...prev, backgroundColor: color }))
         }
-        anchorEl={anchorEl.colorPicker}
-        onClose={() => setAnchorEl((prev) => ({ ...prev, colorPicker: null }))}
+        anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
         onConfirm={() => {
           handleUpdate({ backgroundColor: todo.backgroundColor });
         }}
