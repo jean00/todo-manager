@@ -1,6 +1,7 @@
 import {
   AppBar,
   Box,
+  debounce,
   IconButton,
   InputAdornment,
   TextField,
@@ -11,9 +12,15 @@ import { useColorScheme } from "@mui/material/styles";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import { todosService } from "../../service/todosService";
 
 const Header = () => {
   const { mode, setMode } = useColorScheme();
+  const { getTodo } = todosService();
+
+  const debouncedSearch = debounce((query: string) => {
+    getTodo(query);
+  }, 1000);
 
   if (!mode) {
     return null;
@@ -36,6 +43,7 @@ const Header = () => {
             id="filled-basic"
             label="Search"
             variant="outlined"
+            placeholder="Search"
             size="small"
             slotProps={{
               input: {
@@ -46,6 +54,7 @@ const Header = () => {
                 ),
               },
             }}
+            onChange={(event) => debouncedSearch(event.target.value)}
           />
         </Box>
         <IconButton

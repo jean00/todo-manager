@@ -20,4 +20,5 @@ export interface Todo {
   title: string;
   description: string;
   backgroundColor?: string;
+  isPinned?: boolean;
 }

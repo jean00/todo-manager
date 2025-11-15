@@ -21,16 +21,20 @@ export const todosService = () => {
     data: { title?: string; description?: string; backgroundColor?: string }
   ) => {
     const endpoints = await getEndpoints();
-    const res = await axios.patch(`${endpoints.todos}/${todoId}`, data);
-    return res.data;
+    await axios.patch(`${endpoints.todos}/${todoId}`, data);
   };
 
   const createTodo = async (title: string, description?: string) => {
     const endpoints = await getEndpoints();
     const body = { title, description };
     console.log({ body });
-    const res = await axios.post(endpoints.todos, body);
-    return res.data;
+    await axios.post(endpoints.todos, body);
+  };
+
+  const getTodo = async (query: string) => {
+    const endpoints = await getEndpoints();
+    const res = await axios.get(`${endpoints.todos}?q=${query}`);
+    if (res.data) setTodos(res.data.todos);
   };
 
   return {
@@ -38,5 +42,6 @@ export const todosService = () => {
     deleteTodo,
     updateTodo,
     createTodo,
+    getTodo,
   };
 };

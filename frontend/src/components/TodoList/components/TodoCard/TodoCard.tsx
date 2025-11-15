@@ -12,12 +12,12 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
+import PushPinIcon from "@mui/icons-material/PushPin";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
 import AddAlertOutlinedIcon from "@mui/icons-material/AddAlertOutlined";
 import type { TodoCardProps } from "./TodoCard.type";
 import { useState } from "react";
 import { useCrossStore } from "../../../../store/cross/store";
-import { todosService } from "../../../../service/todosService";
 import ColorPicker from "../../../ui/ColorPicker";
 
 const options = [
@@ -31,12 +31,14 @@ const options = [
 const ITEM_HEIGHT = 48;
 
 const TodoCard = ({
-  id,
+  _id: id,
   title,
   description,
   backgroundColor,
+  isPinned,
+  onDelete,
+  onUpdate,
 }: TodoCardProps) => {
-  const { getTodos, deleteTodo, updateTodo } = todosService();
   const [anchorEl, setAnchorEl] = useState<{
     colorPicker: HTMLElement | null;
     menu: HTMLElement | null;
@@ -47,40 +49,32 @@ const TodoCard = ({
   const open = Boolean(anchorEl.menu);
   const { setModalConfig } = useCrossStore();
   const theme = useTheme();
-  const [selectedColor, setSelectedColor] = useState(backgroundColor || "");
+  const [todo, setTodo] = useState({
+    isPinned: isPinned || false,
+    backgroundColor: backgroundColor || "",
+  });
 
   const handleDelete = async () => {
-    try {
-      await deleteTodo(id);
-      await getTodos();
-    } catch (error) {
-      console.error("Failed to delete todo:", error);
-    } finally {
-      setModalConfig({ open: false });
-      setAnchorEl((prev) => ({
-        ...prev,
-        menu: null,
-      }));
-    }
+    await onDelete(id);
+    setModalConfig({ open: false });
+    setAnchorEl((prev) => ({
+      ...prev,
+      menu: null,
+    }));
   };
 
   const handleUpdate = async (edited: {
     title?: string;
     description?: string;
     backgroundColor?: string;
+    isPinned?: boolean;
   }) => {
-    try {
-      await updateTodo(id, edited);
-      await getTodos();
-    } catch (error) {
-      console.error("Failed to update todo:", error);
-    } finally {
-      setModalConfig({ open: false });
-      setAnchorEl((prev) => ({
-        ...prev,
-        menu: null,
-      }));
-    }
+    await onUpdate(id, edited);
+    setModalConfig({ open: false });
+    setAnchorEl((prev) => ({
+      ...prev,
+      menu: null,
+    }));
   };
 
   const handleMenuOptionClick = (option: string) => {
@@ -121,7 +115,8 @@ const TodoCard = ({
     <>
       <Card
         sx={{
-          backgroundColor: selectedColor || theme.palette.background.paper,
+          backgroundColor:
+            todo.backgroundColor || theme.palette.background.paper,
           borderRadius: "0.75rem",
           "& .actions": {
             opacity: 0,
@@ -138,7 +133,15 @@ const TodoCard = ({
           title={title}
           action={
             <IconButton className="actions">
-              <PushPinOutlinedIcon />
+              {todo.isPinned ? (
+                <PushPinIcon
+                  onClick={() => handleUpdate({ isPinned: !todo.isPinned })}
+                />
+              ) : (
+                <PushPinOutlinedIcon
+                  onClick={() => handleUpdate({ isPinned: !todo.isPinned })}
+                />
+              )}
             </IconButton>
           }
         />
@@ -221,12 +224,14 @@ const TodoCard = ({
         </CardActions>
       </Card>
       <ColorPicker
-        color={selectedColor || theme.palette.background.paper}
-        setColor={setSelectedColor}
+        color={todo.backgroundColor || theme.palette.background.paper}
+        setColor={(color) =>
+          setTodo((prev) => ({ ...prev, backgroundColor: color }))
+        }
         anchorEl={anchorEl.colorPicker}
         onClose={() => setAnchorEl((prev) => ({ ...prev, colorPicker: null }))}
         onConfirm={() => {
-          handleUpdate({ backgroundColor: selectedColor });
+          handleUpdate({ backgroundColor: todo.backgroundColor });
         }}
       />
     </>
