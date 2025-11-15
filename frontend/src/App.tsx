@@ -15,6 +15,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useCreateTodo } from "./hooks/useTodos";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { SEO, HelmetProvider } from "./components/SEO";
 
 const theme = createTheme({
   colorSchemes: {
@@ -67,6 +68,7 @@ function AppContent() {
 
   return (
     <ThemeProvider theme={theme}>
+      <SEO />
       <CssBaseline />
       <Header />
       <main>
@@ -102,12 +104,14 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AppContent />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <AppContent />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </HelmetProvider>
   );
 }
 
