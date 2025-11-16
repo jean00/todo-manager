@@ -84,6 +84,7 @@ function AppContent() {
               setModalConfig({
                 open: true,
                 modalType: "create",
+                backgroundColor: undefined,
                 onClose: () =>
                   setModalConfig({
                     open: false,
