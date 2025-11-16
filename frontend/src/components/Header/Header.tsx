@@ -70,7 +70,7 @@ const Header = () => {
 
           {/* MOBILE SEARCH ICON */}
           <IconButton
-            sx={{ display: { xs: "block", sm: "none" } }}
+            sx={{ display: { sm: "none" } }}
             onClick={() => setMobileSearchOpen((prev) => !prev)}
           >
             <SearchIcon />
