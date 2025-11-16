@@ -85,6 +85,9 @@ function AppContent() {
                 open: true,
                 modalType: "create",
                 backgroundColor: undefined,
+                defaultDescription: undefined,
+                defaultTitle: undefined,
+                defaultDueDate: undefined,
                 onClose: () =>
                   setModalConfig({
                     open: false,
