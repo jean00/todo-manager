@@ -95,6 +95,7 @@ const TodoCard = ({
               modalType: "edit",
               defaultTitle: title,
               defaultDescription: description,
+              backgroundColor: todo.backgroundColor,
               onClose: () => {
                 setModalConfig({ open: false });
               },

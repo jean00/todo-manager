@@ -14,6 +14,7 @@ export interface ModalConfig {
   defaultDescription?: string;
   onConfirm?: (args?: any) => void;
   defaultDueDate?: Date;
+  backgroundColor?: string;
 }
 
 export interface Todo {
