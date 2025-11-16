@@ -23,16 +23,19 @@ const CommonModal = ({
   defaultTitle,
   defaultDescription,
   defaultDueDate,
+  backgroundColor,
 }: ModalConfig) => {
   const theme = useTheme();
   const [edited, setEdited] = useState<{
     title: string;
     description: string;
     dueDate?: Date | undefined;
+    backgroundColor?: string;
   }>({
     title: defaultTitle || "",
     description: defaultDescription || "",
     dueDate: defaultDueDate,
+    backgroundColor: backgroundColor || "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,14 +71,14 @@ const CommonModal = ({
       left: "50%",
       transform: "translate(-50%, -50%)",
       width: { xs: "90%", sm: 500 },
-      bgcolor: theme.palette.background.paper,
+      bgcolor: backgroundColor || theme.palette.background.paper,
       color: theme.palette.text.primary,
       borderRadius: 3,
       boxShadow: 24,
       p: 2,
       outline: "none",
     }),
-    [theme]
+    [theme, backgroundColor]
   );
 
   if (!open) {
