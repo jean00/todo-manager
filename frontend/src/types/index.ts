@@ -13,7 +13,7 @@ export interface ModalConfig {
   defaultTitle?: string;
   defaultDescription?: string;
   onConfirm?: (args?: any) => void;
-  defaultDueDate?: Date;
+  defaultDueDate?: Date | null;
   backgroundColor?: string;
 }
 

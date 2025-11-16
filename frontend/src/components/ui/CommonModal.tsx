@@ -29,12 +29,12 @@ const CommonModal = ({
   const [edited, setEdited] = useState<{
     title: string;
     description: string;
-    dueDate?: Date | undefined;
+    dueDate?: Date | null;
     backgroundColor?: string;
   }>({
     title: defaultTitle || "",
     description: defaultDescription || "",
-    dueDate: defaultDueDate,
+    dueDate: defaultDueDate || null,
     backgroundColor: backgroundColor || "",
   });
 
