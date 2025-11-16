@@ -8,6 +8,7 @@ import {
   IconButton,
   Stack,
   Typography,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
@@ -36,6 +37,7 @@ const TodoCard = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const { setModalConfig } = useCrossStore();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [todo, setTodo] = useState({
     isPinned: isPinned || false,
     backgroundColor: backgroundColor || "",
@@ -73,15 +75,17 @@ const TodoCard = ({
           backgroundColor:
             todo.backgroundColor || theme.palette.background.paper,
           borderRadius: "0.75rem",
-          "& .actions": {
-            opacity: 0,
-            visibility: "hidden",
-            transition: "opacity 0.2s ease, visibility 0.2s ease",
-          },
-          "&:hover .actions": {
-            opacity: 1,
-            visibility: "visible",
-          },
+          ...(!isMobile && {
+            "& .actions": {
+              opacity: 0,
+              visibility: "hidden",
+              transition: "opacity 0.2s ease, visibility 0.2s ease",
+            },
+            "&:hover .actions": {
+              opacity: 1,
+              visibility: "visible",
+            },
+          }),
         }}
       >
         <CardActionArea
