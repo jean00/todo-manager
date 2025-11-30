@@ -93,6 +93,8 @@ const Header = () => {
     }
   }, [isAuthenticated, getUserFromToken]);
 
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchQuery(inputValue);
