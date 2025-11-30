@@ -15,13 +15,41 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState, useCallback, useEffect } from "react";
 import { useCrossStore } from "../../store/cross/store";
+import { GoogleLogin } from "@react-oauth/google";
+import { useSessionToken } from "../../hooks/useSessionToken";
+import { authenticateWithGoogle } from "../../service/authService";
 
 const Header = () => {
   const { mode, setMode } = useColorScheme();
   const { searchQuery, setSearchQuery } = useCrossStore();
   const [inputValue, setInputValue] = useState(searchQuery);
-
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const { saveToken, getUserFromToken, logout } = useSessionToken();
+
+  const handleSuccess = async (response: any) => {
+    const credential = response?.credential;
+    if (!credential) return;
+
+    try {
+      // Send credential to backend to verify and save user to DB
+      const authResponse = await authenticateWithGoogle(credential);
+      console.log("Authentication successful:", authResponse);
+
+      // Save the token to session storage (backend sets it as cookie too)
+      saveToken(credential);
+
+      // Get user data
+      const user = getUserFromToken();
+      console.log("Logged in user:", user);
+    } catch (error) {
+      console.error("Login Failed:", error);
+    }
+  };
+
+  const handleError = () => {
+    console.error("Login Failed");
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -87,6 +115,8 @@ const Header = () => {
               <DarkModeOutlinedIcon />
             )}
           </IconButton>
+          <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+          <button onClick={logout}>Logout</button>
         </Toolbar>
 
         {/* MOBILE SLIDE-DOWN SEARCH BAR */}

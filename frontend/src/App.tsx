@@ -1,11 +1,6 @@
 import Header from "./components/Header/Header";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import TodoList from "./components/TodoList/TodoList";
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
-import "./App.css";
 import { useCrossStore } from "./store/cross/store";
 import CommonModal from "./components/ui/CommonModal";
 import { Box, CssBaseline, Fab } from "@mui/material";
@@ -15,6 +10,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useCreateTodo } from "./hooks/useTodos";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import "@fontsource/roboto/300.css";
+import "@fontsource/roboto/400.css";
+import "@fontsource/roboto/500.css";
+import "@fontsource/roboto/700.css";
+import "./App.css";
 
 const theme = createTheme({
   colorSchemes: {
@@ -106,12 +107,14 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AppContent />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <AppContent />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </GoogleOAuthProvider>
   );
 }
 
