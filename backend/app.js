@@ -2,6 +2,7 @@ const express = require("express");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 const app = express();
 const todoRouter = require("./Routes/TodoRoutes");
 const morgan = require("morgan");
@@ -37,8 +38,16 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("combined"));
 }
 
-// CORS
-app.use(cors());
+// CORS - Allow credentials (cookies)
+app.use(
+  cors({
+    origin: true, // Allow all origins in development, configure for production
+    credentials: true,
+  })
+);
+
+// Cookie parser
+app.use(cookieParser());
 
 // Body parser, reading data from body into req.body with size limit
 app.use(express.json({ limit: "10kb" }));
